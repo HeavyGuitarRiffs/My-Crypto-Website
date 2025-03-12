@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: "Arial", sans-serif;
+            padding: 20px;
+        }
+
+        .main-navbar {
+            background: #111;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .main-navbar ul li {
+            display: inline;
+            margin: 0 20px;
+        }
+
+        .main-navbar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+            transition: 0.3s ease-in-out;
+        }
+
+        .main-navbar ul li a:hover {
+            color: #00ff00;
+        }
+
+        .blog-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .blog-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .blog-date {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .blog-image {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .blog-content {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: justify;
+            line-height: 1.6;
+        }
+
+        .meta-info {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 10px;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background: #00ff00;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #009900;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="main-navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blog.html">Blog</a></li>
+        </ul>
+    </nav>
+
+    <div class="blog-container">
+        <h1 id="post-title" class="blog-title">Loading...</h1>
+        <p id="post-date" class="blog-date"></p>
+        <img id="post-image" src="" alt="Blog Image" class="blog-image">
+        <p id="post-content" class="blog-content">Fetching content...</p>
+        <p class="meta-info">
+            Views: <span id="post-views">0</span> | Reads: <span id="post-reads">0</span>
+        </p>
+        <a href="blog.html" class="back-btn">← Back to Blog</a>
+    </div>
+
+ <!-- ✅ Edit & Delete Buttons (Only for Admins) -->
+<button id="edit-btn" class="edit-btn" style="display: none;">✏️ Edit</button>
+<button id="save-btn" class="save-btn" style="display: none;">💾 Save</button>
+<button id="delete-btn" class="delete-btn" style="display: none;">🗑️ Delete</button>
+
+
+    <script>
+
+const isAdmin = localStorage.getItem("isAdmin") === "true"; // ✅ Check if user is admin
+        let blogId = null;
+
+        async function loadPost() {
+            const params = new URLSearchParams(window.location.search);
+            blogId = params.get("id");
+
+            const response = await fetch(`http://localhost:5000/api/blogs/${blogId}`);
+            const post = await response.json();
+
+            if (!post) {
+                document.body.innerHTML = "<h2>Blog post not found.</h2>";
+                return;
+            }
+
+            // ✅ Display post details
+            document.getElementById("post-title").textContent = post.title;
+            document.getElementById("post-date").textContent = post.date;
+            document.getElementById("post-content").textContent = post.content;
+
+            if (post.coverImage) {
+                const img = document.getElementById("post-image");
+                img.src = `http://localhost:5000${post.coverImage}`;
+                img.style.display = "block";
+            }
+ // ✅ Show Edit & Delete Buttons Only for Admin
+ if (isAdmin) {
+            document.getElementById("edit-btn").style.display = "inline-block";
+            document.getElementById("delete-btn").style.display = "inline-block";
+            }
+        }
+
+        document.getElementById("edit-btn").addEventListener("click", () => {
+            // ✅ Convert title and content to editable fields
+            const title = document.getElementById("post-title");
+            const content = document.getElementById("post-content");
+
+            title.innerHTML = `<input type="text" id="edit-title" value="${title.textContent}">`;
+            content.innerHTML = `<textarea id="edit-content">${content.textContent}</textarea>`;
+
+            document.getElementById("edit-btn").style.display = "none";  // Hide Edit button
+            document.getElementById("save-btn").style.display = "inline-block";  // Show Save button
+        });
+
+        document.getElementById("save-btn").addEventListener("click", async () => {
+            const newTitle = document.getElementById("edit-title").value;
+            const newContent = document.getElementById("edit-content").value;
+
+            if (!newTitle || !newContent) {
+                alert("Title and content cannot be empty!");
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5000/api/blogs/${blogId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: newTitle, content: newContent })
+            });
+
+            if (response.ok) {
+                alert("Blog post updated successfully!");
+                window.location.href = "blog.html"; // ✅ Redirect back to blog list
+            } else {
+                alert("Error updating blog post!");
+            }
+        });
+
+        // ✅ DELETE Functionality
+    document.getElementById("delete-btn").addEventListener("click", async () => {
+        const confirmDelete = confirm("Are you sure you want to delete this blog post?");
+        if (!confirmDelete) return;
+
+        const response = await fetch(`http://localhost:5000/api/blogs/${blogId}`, {
+            method: "DELETE"
+        });
+
+        if (response.ok) {
+            alert("Blog post deleted successfully!");
+            window.location.href = "blog.html"; // ✅ Redirect to blog list after deleting
+        } else {
+            alert("Error deleting blog post!");
+        }
+    });
+
+        window.onload = loadPost;
+
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            let postId = urlParams.get("id");
+
+            // ✅ Ensure postId is properly extracted
+            if (!postId || postId.trim() === "" || postId === "undefined" || postId === "null") {
+                console.error("❌ Error: Invalid or missing post ID in URL.");
+                document.querySelector(".blog-container").innerHTML = "<p style='text-align:center;'>Post not found.</p>";
+                return;
+            }
+
+            console.log("🟢 Fetching post with ID:", postId);
+
+            try {
+                // **Ensure the correct API URL**
+                const response = await fetch(`http://localhost:5000/api/blogs/${postId}`);
+
+                if (!response.ok) {
+                    throw new Error(`Post not found. Server responded with status ${response.status}`);
+                }
+
+                const post = await response.json();
+                console.log("🟢 Fetched post data:", post);
+
+                // **Ensure the API returns valid data**
+                if (!post || Object.keys(post).length === 0) {
+                    throw new Error("⚠️ API returned empty or invalid data.");
+                }
+
+                // ✅ Populate Blog Post Data
+                document.getElementById("post-title").innerText = post.title || "Untitled Post";
+                document.getElementById("post-image").src = post.coverImage ? `http://localhost:5000${post.coverImage}` : "images/default-thumbnail.jpg";
+                document.getElementById("post-image").alt = post.title || "Blog Image";
+                document.getElementById("post-content").innerText = post.content || "No content available.";
+                document.getElementById("post-views").innerText = post.views !== undefined ? post.views : "0";
+                document.getElementById("post-reads").innerText = post.reads !== undefined ? post.reads : "0";
+
+                // ✅ Format and display the date properly
+                if (post.date) {
+                    const formattedDate = new Date(post.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
+                    });
+                    document.getElementById("post-date").innerText = `Published on: ${formattedDate}`;
+                } else {
+                    document.getElementById("post-date").innerText = "Published on: Unknown Date";
+                }
+
+            } catch (error) {
+                console.error("❌ Error fetching blog post:", error);
+                document.querySelector(".blog-container").innerHTML = "<p style='text-align:center;'>Error loading blog post.</p>";
+            }
+        });
+    </script>
+
+</body>
+</html>
