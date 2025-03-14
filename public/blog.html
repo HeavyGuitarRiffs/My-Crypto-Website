@@ -253,55 +253,63 @@
     
        
         function loadBlogs() {
-            const cachedBlogs = localStorage.getItem("savedBlogs");
-            if (cachedBlogs) {
-                displayBlogs(JSON.parse(cachedBlogs));
-            }
-        }
+    const cachedBlogs = localStorage.getItem("savedBlogs");
+    console.log("📁 Loaded Cached Blogs:", cachedBlogs); // Debugging Log
+    if (cachedBlogs) {
+        displayBlogs(JSON.parse(cachedBlogs));
+    }
+}
+
     
         function displayBlogs(blogs) {
-            const blogList = document.getElementById("blog-list");
-            blogList.innerHTML = ""; // Clear previous entries
-    
-            blogs.forEach(blog => {
-                const blogId = blog.id || blog._id;
-                if (blog.site !== "second-site") return;
-    
-                const formattedDate = blog.createdAt
-                    ? new Date(blog.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric"
-                      })
-                    : "Unknown Date";
-    
-                let adminControls = "";
-                if (isAdmin) {
-                    adminControls = `
-                        <button onclick="editBlog('${blogId}')" class="edit-btn">✏️ Edit</button>
-                        <button onclick="deleteBlog('${blogId}')" class="delete-btn">🗑️ Delete</button>
-                    `;
-                }
-    
-                blogList.innerHTML += `
-                    <div class="blog-item" id="blog-${blogId}">
-                        <h2>${blog.title}</h2>
-                        ${blog.coverImage ? `<img src="${blog.coverImage}" class="cover-image">` : ""}
-                        <p>${blog.content}</p>
-                        <p class="meta-info">Published on: ${formattedDate}</p>
-                        ${adminControls}
-                    </div>
-                `;
-            });
+    const blogList = document.getElementById("blog-list");
+    blogList.innerHTML = ""; // Clear previous entries
+
+    const filteredBlogs = blogs.filter(blog => blog.site === "second-site");
+    console.log("🔎 Displaying Blogs:", filteredBlogs); // Debugging Log
+
+    filteredBlogs.forEach(blog => {
+        const blogId = blog.id || blog._id;
+        const formattedDate = blog.createdAt
+            ? new Date(blog.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
+              })
+            : "Unknown Date";
+
+        let adminControls = "";
+        if (isAdmin) {
+            adminControls = `
+                <button onclick="editBlog('${blogId}')" class="edit-btn">✏️ Edit</button>
+                <button onclick="deleteBlog('${blogId}')" class="delete-btn">🗑️ Delete</button>
+            `;
         }
+
+        blogList.innerHTML += `
+            <div class="blog-item" id="blog-${blogId}">
+                <h2>${blog.title}</h2>
+                ${blog.coverImage ? `<img src="${blog.coverImage}" class="cover-image">` : ""}
+                <p>${blog.content}</p>
+                <p class="meta-info">Published on: ${formattedDate}</p>
+                ${adminControls}
+            </div>
+        `;
+    });
+}
+
     
-        async function fetchBlogs() {
+async function fetchBlogs() {
     try {
         const response = await fetch("http://localhost:5001/api/blogs?site=second-site");
 
         if (!response.ok) throw new Error(`Server Error: ${response.status}`);
 
         const blogs = await response.json();
+        console.log("✅ Fetched Blogs:", blogs); // Debugging Log
+
+        if (!Array.isArray(blogs)) throw new Error("Invalid blog data received!");
+
         localStorage.setItem("savedBlogs", JSON.stringify(blogs));
         displayBlogs(blogs);
     } catch (error) {
@@ -309,6 +317,7 @@
         loadBlogs(); // If API fails, use cached blogs
     }
 }
+
         
     
         async function saveBlogPost() {
