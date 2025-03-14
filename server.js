@@ -14,19 +14,24 @@ app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
-
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+  
 // ** Ensure uploads directory exists **
 const dir = path.join(__dirname, "uploads/");
 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
 // ** Content Security Policy Middleware **
-app.use((req, res, next) => {
-    res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://thorough-radiance-production.up.railway.app; object-src 'none';"
-    );
-    next();
-});
+
+    app.use((req, res, next) => {
+        res.setHeader(
+          "Content-Security-Policy",
+          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://my-crypto-website-production.up.railway.app; object-src 'none';"
+        );
+        next();
+      });
+            
 
 // ** Check & Connect to MongoDB **
 if (!process.env.MONGO_URI) {
