@@ -29,7 +29,7 @@ function setupPageTransitions() {
 /* 🌟 2. Fetch Blogs from Backend & Display */
 async function fetchBlogs() {
     try {
-        const response = await fetch("http://localhost:5000/api/blogs");
+        const response = await fetch("http://localhost:5001/api/blogs");
         if (!response.ok) throw new Error("Failed to fetch blogs");
 
         const blogs = await response.json();
@@ -43,7 +43,7 @@ async function fetchBlogs() {
             postDiv.innerHTML = `
                 <h2>${blog.title}</h2>
                 <p>${blog.content}</p>
-                ${blog.coverImage ? `<img src="http://localhost:5000${blog.coverImage}" class="cover-img" alt="${blog.title}">` : ""}
+                ${blog.coverImage ? `<img src="http://localhost:5001${blog.coverImage}" class="cover-img" alt="${blog.title}">` : ""}
                 <button class="delete-btn" data-id="${blog._id}">Delete</button>
             `;
 
@@ -68,7 +68,7 @@ async function fetchBlogs() {
 /* 🌟 3. Delete a Blog Post */
 async function deletePost(id) {
     try {
-        const response = await fetch(`http://localhost:5000/api/blogs/${id}`, {
+        const response = await fetch(`http://localhost:5001/api/blogs/${id}`, {
             method: "DELETE",
         });
 
