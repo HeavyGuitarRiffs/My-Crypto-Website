@@ -34,7 +34,7 @@ if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
             
 
 
-mongoose.connect("mongodb://localhost:27017/MyCryptoWebsite.CryptoBlog", {
+mongoose.connect("mongodb://localhost:27017/MyCryptoWebsite_CryptoBlog", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -88,11 +88,13 @@ const upload = multer({
 
 // ** Routes **
 
+
 // 📌 Get all blog posts
 app.get("/api/blogs", async (req, res) => {
     try {
         const blogs = await Blog.find().sort({ createdAt: -1 });
-
+        console.log("Fetched Blogs:", blogs); // Debugging
+        res.json(blogs);
         // ✅ Ensure each blog object contains `_id`
         const formattedBlogs = blogs.map(blog => ({
             id: blog._id, // Convert MongoDB `_id` to `id`

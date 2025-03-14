@@ -1,32 +1,28 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     setupPageTransitions();
-    if (document.getElementById("blog-list")) {
-        fetchBlogs(); // Load blogs from backend
-    }
+    fetchBlogs();
+
+    // Auto-refresh blog list every 5 seconds
+    setInterval(fetchBlogs, 5000);
 });
 
-/* 🌟 1. Page Transitions (Fade-out Effect) */
+/* 🌟 1. Setup Page Transitions */
 function setupPageTransitions() {
     const pageContent = document.querySelector(".page-content");
-
     document.querySelectorAll("nav a").forEach(link => {
-        link.addEventListener("click", function (event) {
-            if (this.href.includes(location.hostname)) { // Prevent external links
+        link.addEventListener("click", event => {
+            if (link.href.includes(location.hostname)) {
                 event.preventDefault();
-                
-                if (pageContent) { 
-                    pageContent.classList.add("fade-out");
-                }
-
+                pageContent?.classList.add("fade-out");
                 setTimeout(() => {
-                    window.location.href = this.href;
-                }, 400); // Wait for fade-out to complete
+                    window.location.href = link.href;
+                }, 400);
             }
         });
     });
 }
 
-/* 🌟 2. Fetch Blogs from Backend & Display */
+/* 🌟 2. Fetch Blogs from Backend */
 async function fetchBlogs() {
     try {
         const response = await fetch("http://localhost:5001/api/blogs");
@@ -34,10 +30,12 @@ async function fetchBlogs() {
 
         const blogs = await response.json();
         const blogList = document.getElementById("blog-list");
+        if (!blogList) return;
+
         blogList.innerHTML = ""; // Clear previous content
 
         blogs.forEach(blog => {
-            let postDiv = document.createElement("div");
+            const postDiv = document.createElement("div");
             postDiv.classList.add("blog-item");
 
             postDiv.innerHTML = `
@@ -50,9 +48,9 @@ async function fetchBlogs() {
             blogList.appendChild(postDiv);
         });
 
-        // Attach event listeners AFTER generating all blog posts
+        // Attach delete event listeners
         document.querySelectorAll(".delete-btn").forEach(button => {
-            button.addEventListener("click", async (event) => {
+            button.addEventListener("click", async event => {
                 const blogId = event.target.getAttribute("data-id");
                 if (confirm("Are you sure you want to delete this post?")) {
                     await deletePost(blogId);
@@ -65,27 +63,8 @@ async function fetchBlogs() {
     }
 }
 
-/* 🌟 3. Delete a Blog Post */
-async function deletePost(id) {
-    try {
-        const response = await fetch(`http://localhost:5001/api/blogs/${id}`, {
-            method: "DELETE",
-        });
-
-        if (response.ok) {
-            alert("Post deleted successfully!");
-            fetchBlogs(); // Refresh the list
-        } else {
-            alert("Error deleting post!");
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to delete post.");
-    }
-}
-
-/* 🌟 4. LocalStorage-based Blog Posts */
-function saveBlogPost() {
+/* 🌟 3. Save Blog Post */
+async function saveBlogPost() {
     const title = document.getElementById("blogTitle")?.value.trim();
     const content = document.getElementById("blogContent")?.value.trim();
 
@@ -94,32 +73,35 @@ function saveBlogPost() {
         return;
     }
 
-    let posts = JSON.parse(localStorage.getItem("blogPosts")) || [];
-    posts.push({ title, content, date: new Date().toISOString() });
+    try {
+        await fetch("http://localhost:5001/api/blogs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, content }),
+        });
 
-    // Sort posts by date (newest first)
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    localStorage.setItem("blogPosts", JSON.stringify(posts));
-    loadBlogPosts();
-
-    // Clear input fields
-    document.getElementById("blogTitle").value = "";
-    document.getElementById("blogContent").value = "";
+        alert("Blog saved successfully!");
+        fetchBlogs(); // Refresh UI after saving
+    } catch (error) {
+        console.error("Error saving blog:", error);
+    }
 }
 
-function loadBlogPosts() {
-    const blogPostsDiv = document.getElementById("blogPosts");
-    if (!blogPostsDiv) return; // Prevent errors if the blog page is not loaded
+/* 🌟 4. Delete a Blog Post */
+async function deletePost(id) {
+    try {
+        const response = await fetch(`http://localhost:5001/api/blogs/${id}`, {
+            method: "DELETE",
+        });
 
-    blogPostsDiv.innerHTML = "";
-
-    let posts = JSON.parse(localStorage.getItem("blogPosts")) || [];
-
-    posts.forEach(post => {
-        let postDiv = document.createElement("div");
-        postDiv.classList.add("blog-post");
-        postDiv.innerHTML = `<h3>${post.title}</h3><p>${post.content}</p><small>${new Date(post.date).toLocaleString()}</small>`;
-        blogPostsDiv.appendChild(postDiv);
-    });
+        if (response.ok) {
+            alert("Post deleted successfully!");
+            fetchBlogs();
+        } else {
+            alert("Error deleting post!");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to delete post.");
+    }
 }
