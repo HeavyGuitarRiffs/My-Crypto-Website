@@ -48,12 +48,6 @@ if (!process.env.MONGO_URI) {
     process.exit(1);
 }
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch(err => {
-        console.error("❌ MongoDB Connection Error:", err);
-        process.exit(1);
-    });
 
 // ** Blog Schema & Model **
 const BlogSchema = new mongoose.Schema({
