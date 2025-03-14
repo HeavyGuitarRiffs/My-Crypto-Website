@@ -33,7 +33,6 @@ if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       });
             
 
-      const mongoose = require("mongoose");
 
 mongoose.connect("mongodb://localhost:27017/MyCryptoWebsite.CryptoBlog", {
     useNewUrlParser: true,
