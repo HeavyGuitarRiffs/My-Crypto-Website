@@ -89,7 +89,7 @@
     </div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
+          const params = new URLSearchParams(window.location.search);
         const index = params.get("index");
         let blogs = JSON.parse(localStorage.getItem("savedBlogs") || "[]");
 
@@ -130,9 +130,6 @@
         }
 
         function saveChanges() {
-            blogs[index].title = titleInput.value;
-            blogs[index].content = contentInput.value;
-
             if (imageUpload.files.length > 0) {
                 const reader = new FileReader();
                 reader.onload = function (event) {
@@ -141,12 +138,15 @@
                     localStorage.setItem("savedBlogs", JSON.stringify(blogs));
                 };
                 reader.readAsDataURL(imageUpload.files[0]);
-            } else {
-                localStorage.setItem("savedBlogs", JSON.stringify(blogs));
             }
+
+            blogs[index].title = titleInput.value;
+            blogs[index].content = contentInput.value;
 
             blogTitle.textContent = titleInput.value;
             blogContent.textContent = contentInput.value;
+
+            localStorage.setItem("savedBlogs", JSON.stringify(blogs));
 
             blogTitle.classList.remove("hidden");
             blogContent.classList.remove("hidden");
@@ -171,7 +171,7 @@
     const blogList = document.getElementById("blog-list");
     blogList.innerHTML = blogs.map((blog, index) => `
         <div class="blog-item">
-            ${blog.image ? `<img src="${blog.image}" class="thumbnail">` : ""}
+            ${blog.coverImage ? `<img src="${blog.coverImage}" class="thumbnail">` : ""}
             <h2 class="blog-title">
                 <a href="blog-post.html?index=${index}">${blog.title}</a>
             </h2>
@@ -186,7 +186,10 @@
     const index = params.get("index");
     const savedBlogs = JSON.parse(localStorage.getItem("savedBlogs")) || [];
 
-    if (savedBlogs[index]) {
+    if (!index || !savedBlogs[index]) {
+        document.body.innerHTML = "<h2>Blog not found.</h2><a href='blog.html' class='back-link'>← Back to Blog</a>";
+        return;
+    }
         const blog = savedBlogs[index];
         document.getElementById("post-title").innerText = blog.title;
         document.getElementById("post-content").innerText = blog.content;
@@ -198,22 +201,7 @@
             imgElement.style.display = "block";
         }
     }
-}
 
-function deletePost() {
-    const params = new URLSearchParams(window.location.search);
-    const index = params.get("index");
-    let savedBlogs = JSON.parse(localStorage.getItem("savedBlogs")) || [];
-
-    savedBlogs.splice(index, 1);
-    localStorage.setItem("savedBlogs", JSON.stringify(savedBlogs));
-    alert("Blog deleted!");
-    window.location.href = "blog.html";
-}
-
-function editPost() {
-    // Add edit logic here
-}
 
 window.onload = loadBlogPost;
 
@@ -228,6 +216,6 @@ window.onload = loadBlogPost;
     <img id="post-image" class="thumbnail" style="display:none;">
     <p id="post-content"></p>
     <p class="meta-info" id="post-date"></p>
-    <button onclick="editPost()">Edit</button>
-    <button onclick="deletePost()">Delete</button>
+    <button onclick="editBlog()">Edit</button>
+    <button onclick="deleteBlog()">Delete</button>
 </div>

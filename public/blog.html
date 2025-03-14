@@ -330,7 +330,7 @@
             }
     
             try {
-                const response = await fetch("http://localhost:5000/api/blogs", {
+                const response = await fetch("http://localhost:5001/api/blogs", {
                     method: "POST",
                     body: formData
                 });
@@ -359,11 +359,40 @@
             }
         }
     
-        function editBlog(blogId) {
-            alert(`Editing blog with ID: ${blogId}`);
-            // Add logic for editing a blog post
+        async function editBlog(blogId) {
+    const blogItem = document.getElementById(`blog-${blogId}`);
+    if (!blogItem) return alert("Blog not found!");
+
+    const title = blogItem.querySelector("h2").innerText;
+    const content = blogItem.querySelector("p").innerText;
+
+    const newTitle = prompt("Edit Blog Title:", title);
+    const newContent = prompt("Edit Blog Content:", content);
+
+    if (!newTitle || !newContent) {
+        alert("Title and Content are required!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:5001/api/blogs/${blogId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle, content: newContent })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update blog. Server responded with ${response.status}`);
         }
-    
+
+        alert("✅ Blog post updated successfully!");
+        fetchBlogs(); // Reload blogs to show updates
+    } catch (error) {
+        console.error("❌ Error updating blog post:", error);
+        alert("⚠️ Error updating blog post. Please try again.");
+    }
+}
+
         async function deleteBlog(blogId) {
             if (!confirm("Are you sure you want to delete this blog post?")) return;
     
