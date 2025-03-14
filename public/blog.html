@@ -251,6 +251,7 @@
             fetchBlogs(); // Fetch fresh blogs from API
         });
     
+       
         function loadBlogs() {
             const cachedBlogs = localStorage.getItem("savedBlogs");
             if (cachedBlogs) {
@@ -295,20 +296,19 @@
         }
     
         async function fetchBlogs() {
-            try {
-                const response = await fetch("http://localhost:5001/api/blogs?site=second-site");
-    
-                if (!response.ok) {
-                    throw new Error(`Server Error: ${response.status}`);
-                }
-    
-                const blogs = await response.json();
-                localStorage.setItem("savedBlogs", JSON.stringify(blogs)); // Store in localStorage
-                displayBlogs(blogs);
-            } catch (error) {
-                console.error("❌ Error fetching blogs:", error);
-                loadBlogs(); // Load cached blogs if API call fails
-            }
+    try {
+        const response = await fetch("http://localhost:5001/api/blogs?site=second-site");
+
+        if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+
+        const blogs = await response.json();
+        localStorage.setItem("savedBlogs", JSON.stringify(blogs));
+        displayBlogs(blogs);
+    } catch (error) {
+        console.error("❌ Error fetching blogs:", error);
+        loadBlogs(); // If API fails, use cached blogs
+    }
+}
         }
     
         async function saveBlogPost() {
@@ -348,17 +348,17 @@
         }
     
         function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById("imagePreview").src = e.target.result;
-                    document.getElementById("imagePreview").style.display = "block";
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-    
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("imagePreview").src = e.target.result;
+            document.getElementById("imagePreview").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
         async function editBlog(blogId) {
     const blogItem = document.getElementById(`blog-${blogId}`);
     if (!blogItem) return alert("Blog not found!");
