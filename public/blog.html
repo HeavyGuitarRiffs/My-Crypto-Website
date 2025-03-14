@@ -212,8 +212,8 @@
         </ul>
     </nav>
 
-     <!-- Charlotte 1 -->
- <embed src="https://www.fightersgeneration.com/characters2/nako-lowspec.gif"/>
+     <!-- Solo Leveling -->
+ <embed src="https://media1.tenor.com/m/NFcX9y3seTIAAAAC/anime-adam-apple.gif"/>
 
  
 
@@ -274,67 +274,59 @@
 
         
         window.onload = () => {
-    fetchBlogs(); // ✅ Loads blogs immediately on page load
-};
-
+        fetchBlogs(); // ✅ Loads blogs immediately on page load
+    };
 
     async function fetchBlogs() {
-    try {
-        const response = await fetch("http://localhost:5000/api/blogs");
+        try {
+            const response = await fetch("http://localhost:5001/api/blogs?site=second-site");
 
-        if (!response.ok) {
-            throw new Error(`Server Error: ${response.status}`);
-        }
-
-        const blogs = await response.json();
-        const blogList = document.getElementById("blog-list");
-        blogList.innerHTML = "";
-
-        blogs.forEach(blog => {
-            console.log("🔍 Checking Blog Data:", blog);
-
-            const blogId = blog.id || blog._id;
-            if (!blogId) {
-                console.warn("⚠️ Missing Blog ID - Skipping this blog:", blog);
-                return;
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.status}`);
             }
 
-            const formattedDate = blog.createdAt
-                ? new Date(blog.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric"
-                  })
-                : "Unknown Date";
+            const blogs = await response.json();
+            const blogList = document.getElementById("blog-list");
+            blogList.innerHTML = ""; // Clear previous entries
 
+            blogs.forEach(blog => {
+                console.log("🔍 Checking Blog Data:", blog);
 
-            let adminControls = "";
-            if (isAdmin) {
-                adminControls = `
-                    <button onclick="editBlog('${blogId}')" class="edit-btn">✏️ Edit</button>
-                    <button onclick="deleteBlog('${blogId}')" class="delete-btn">🗑️ Delete</button>
+                const blogId = blog.id || blog._id;
+                if (blog.site !== "second-site") {
+                    console.warn("⚠️ Blog does not belong to second-site - Skipping:", blog);
+                    return;
+                }
+
+                const formattedDate = blog.createdAt
+                    ? new Date(blog.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric"
+                      })
+                    : "Unknown Date";
+
+                let adminControls = "";
+                if (isAdmin) {
+                    adminControls = `
+                        <button onclick="editBlog('${blogId}')" class="edit-btn">✏️ Edit</button>
+                        <button onclick="deleteBlog('${blogId}')" class="delete-btn">🗑️ Delete</button>
+                    `;
+                }
+
+                blogList.innerHTML += `
+                    <div class="blog-item" id="blog-${blogId}">
+                        <h2>${blog.title}</h2>
+                        <p>${blog.content}</p>
+                        <p class="meta-info">Published on: ${formattedDate}</p>
+                        ${adminControls}
+                    </div>
                 `;
-            }
-
-            blogList.innerHTML += `
-                <div class="blog-item" id="blog-${blogId}">
-                    <a href="post.html?id=${blogId}" class="thumbnail-container">
-                        <img src="${blog.coverImage ? `http://localhost:5000${blog.coverImage}` : 'images/default-thumbnail.jpg'}" class="thumbnail">
-                    </a>
-                    <h2 class="blog-title"><a href="post.html?id=${blogId}">${blog.title}</a></h2>
-                    <p class="meta-info">${formattedDate} | Views: ${blog.views}</p>
-                    ${adminControls}
-                </div>`;
-        });
-
-    } catch (error) {
-        console.error("❌ Error fetching blogs:", error);
-        document.getElementById("blog-list").innerHTML = "<p>Error loading blog posts.</p>";
+            });
+        } catch (error) {
+            console.error("❌ Error fetching blogs:", error);
+        }
     }
-}
-
-
-
 </script>
 
 </body>
