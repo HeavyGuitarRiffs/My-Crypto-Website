@@ -27,26 +27,29 @@ if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     app.use((req, res, next) => {
         res.setHeader(
           "Content-Security-Policy",
-          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://my-crypto-website-production.up.railway.app; object-src 'none';"
+          "default-src 'self'; script-src 'self' https://my-crypto-website-production.up.railway.app; object-src 'none';"
         );
         next();
       });
             
-
-
-mongoose.connect("mongodb://localhost:27017/MyCryptoWebsite_CryptoBlog", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => console.error("❌ MongoDB connection error:", err));
-
-
 // ** Check & Connect to MongoDB **
 if (!process.env.MONGO_URI) {
     console.error("❌ MONGO_URI is missing from .env file.");
     process.exit(1);
 }
+
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log("✅ Connected to MongoDB"))
+.catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1); // Exit only on failure
+});
+
+
+
 
 
 // ** Blog Schema & Model **
@@ -76,6 +79,7 @@ const storage = multer.diskStorage({
 // ** Multer File Upload Middleware **
 const upload = multer({
     storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file limit
     fileFilter: (req, file, cb) => {
         const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
         if (allowedMimeTypes.includes(file.mimetype)) {
@@ -86,6 +90,7 @@ const upload = multer({
     }
 });
 
+
 // ** Routes **
 
 
@@ -93,23 +98,23 @@ const upload = multer({
 app.get("/api/blogs", async (req, res) => {
     try {
         const blogs = await Blog.find().sort({ createdAt: -1 });
-        console.log("Fetched Blogs:", blogs); // Debugging
-        res.json(blogs);
-        // ✅ Ensure each blog object contains `_id`
-        const formattedBlogs = blogs.map(blog => ({
-            id: blog._id, // Convert MongoDB `_id` to `id`
-            title: blog.title,
-            content: blog.content,
-            coverImage: blog.coverImage,
-            views: blog.views,
-            createdAt: blog.createdAt,
-            date: blog.date // ✅ Add this line
-        }));
+const formattedBlogs = blogs.map(blog => ({
+    id: blog._id,
+    title: blog.title,
+    content: blog.content,
+    coverImage: blog.coverImage,
+    views: blog.views,
+    createdAt: blog.createdAt,
+    date: blog.date
+}));
 
-        res.json(formattedBlogs);
+res.json(formattedBlogs);
+
+
+        
     } catch (error) {
         console.error("❌ Error fetching blogs:", error);
-        res.status(500).json({ error: "Server Error" });
+        res.status(500).json({ error: error.message});
     }
 });
 
@@ -182,9 +187,10 @@ app.delete("/api/blogs/:id", async (req, res) => {
 
         // Delete associated image file if it exists
         if (deletedBlog.coverImage) {
-            const filePath = path.join(__dirname, deletedBlog.coverImage);
+            const filePath = path.resolve(__dirname, deletedBlog.coverImage);
             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
+        
 
         res.json({ message: "Blog deleted successfully", id: req.params.id }); // ✅ Return deleted blog's ID
     } catch (error) {
@@ -193,22 +199,31 @@ app.delete("/api/blogs/:id", async (req, res) => {
     }
 });
 
-app.patch("/api/blogs/:id", async (req, res) => {
+app.patch("/api/blogs/:id", upload.single("coverImage"), async (req, res) => {
     try {
-        const { title, content, coverImage } = req.body; // Only allow these fields
+        const { title, content } = req.body;
+        const existingBlog = await Blog.findById(req.params.id);
+        if (!existingBlog) return res.status(404).json({ error: "Blog not found" });
+
+        let newCoverImage = existingBlog.coverImage;
+        if (req.file) {
+            newCoverImage = `/uploads/${req.file.filename}`;
+
+            // Delete old image if it exists
+            if (existingBlog.coverImage) {
+                const oldFilePath = path.join(__dirname, existingBlog.coverImage);
+                if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
+            }
+        }
 
         const updatedBlog = await Blog.findByIdAndUpdate(
             req.params.id,
-            { title, content, coverImage },
+            { title, content, coverImage: newCoverImage },
             { new: true }
         );
 
-        if (!updatedBlog) {
-            return res.status(404).json({ error: "Blog not found" });
-        }
-
         res.json({
-            id: updatedBlog._id, // ✅ Ensure frontend receives `id`
+            id: updatedBlog._id,
             title: updatedBlog.title,
             content: updatedBlog.content,
             coverImage: updatedBlog.coverImage,
@@ -221,6 +236,7 @@ app.patch("/api/blogs/:id", async (req, res) => {
         res.status(500).json({ error: "Error updating blog post" });
     }
 });
+
 
 
 

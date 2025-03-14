@@ -270,13 +270,10 @@
 
     filteredBlogs.forEach(blog => {
         const blogId = blog.id || blog._id;
-        const formattedDate = blog.createdAt
-            ? new Date(blog.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric"
-              })
-            : "Unknown Date";
+        const formattedDate = blog.createdAt && !isNaN(new Date(blog.createdAt))
+    ? new Date(blog.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    : "Unknown Date";
+
 
         let adminControls = "";
         if (isAdmin) {
@@ -373,7 +370,8 @@ async function fetchBlogs() {
     if (!blogItem) return alert("Blog not found!");
 
     const title = blogItem.querySelector("h2").innerText;
-    const content = blogItem.querySelector("p").innerText;
+    const content = blogItem.querySelector(".meta-info").previousElementSibling.innerText;
+
 
     const newTitle = prompt("Edit Blog Title:", title);
     const newContent = prompt("Edit Blog Content:", content);
