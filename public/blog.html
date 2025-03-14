@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
+    
     <style>
-        /* General Styles */
         body {
             background-image: url('images/programmer.png'); 
             background-size: cover;
@@ -19,25 +18,21 @@
             font-family: "Arial", sans-serif;
         }
 
-        /* Navbar */
         .main-navbar {
             background: #222;
             padding: 15px 0;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
-
         .main-navbar ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-
         .main-navbar ul li {
             display: inline;
             margin: 0 20px;
         }
-
         .main-navbar ul li a {
             color: white;
             text-decoration: none;
@@ -47,12 +42,10 @@
             transition: 0.3s ease-in-out;
             text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
         }
-
         .main-navbar ul li a:hover {
             color: #00ff00;
         }
 
-        /* Blog Container */
         .blog-container {
             max-width: 800px;
             margin: 120px auto 20px auto;
@@ -79,14 +72,12 @@
             box-shadow: 0 4px 6px rgba(0, 255, 0, 0.4);
         }
 
-        /* Blog Form */
         .blog-form {
             margin-top: 50px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-
         .blog-form input, .blog-form textarea {
             width: 100%;
             padding: 12px;
@@ -94,7 +85,6 @@
             border-radius: 5px;
             font-size: 16px;
         }
-
         .blog-form button {
             padding: 12px;
             background: #00ff00;
@@ -107,19 +97,24 @@
             transition: 0.3s;
             text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
         }
-
         .blog-form button:hover {
             background: #009900;
             color: white;
         }
 
-        /* Blog Post */
         .blog-item {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             margin: 20px 0;
             border-radius: 8px;
             text-align: center;
+            position: relative;
+        }
+
+        .thumbnail-container {
+            position: relative;
+            display: block;
+            text-decoration: none;
         }
 
         .thumbnail {
@@ -127,18 +122,21 @@
             max-height: 250px;
             object-fit: cover;
             border-radius: 8px;
+            display: block;
         }
 
         .blog-title {
             margin-top: 10px;
             font-size: 20px;
             font-weight: bold;
+            text-align: center;
         }
 
         .blog-title a {
             color: #00ff00;
             text-decoration: none;
             transition: 0.3s;
+            display: inline-block;
         }
 
         .blog-title a:hover {
@@ -151,7 +149,6 @@
             color: #ccc;
         }
 
-        /* Footer */
         .social-footer {
             background: #222;
             padding: 20px;
@@ -159,34 +156,52 @@
             margin-top: 40px;
             box-shadow: 0 -4px 6px rgba(0, 255, 0, 0.3);
         }
-
         .social-footer p {
             color: white;
             font-size: 14px;
         }
 
-        /* Admin Buttons */
         .edit-btn, .delete-btn, .save-btn {
-            margin: 5px;
-            padding: 5px 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 5px;
-        }
+    margin: 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+}
 
-        .edit-btn { background-color: #007bff; color: white; }
-        .delete-btn { background-color: #ff4d4d; color: white; }
-        .save-btn { background-color: #28a745; color: white; }
+.edit-btn {
+    background-color: #007bff;
+    color: white;
+}
 
-        .edit-btn:hover { background-color: #0056b3; }
-        .delete-btn:hover { background-color: #cc0000; }
-        .save-btn:hover { background-color: #218838; }
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
     </style>
 </head>
 <body class="blog">
-
+    
     <nav class="main-navbar">
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -197,7 +212,18 @@
         </ul>
     </nav>
 
-    <!-- Blog Form -->
+     <!-- Solo Leveling -->
+ <embed src="https://media1.tenor.com/m/NFcX9y3seTIAAAAC/anime-adam-apple.gif"/>
+
+   
+ <!-- Ethereum Diamond -->
+ <embed src="https://media.tenor.com/8CnlmiFa-rAAAAAi/eth-ethereum.gif"/>
+
+   
+ <!-- Persona What -->
+ <embed src="https://media.tenor.com/9nA-o2ZgCLIAAAAj/persona-what.gif"/>
+
+ 
     <div class="blog-container">
         <div class="title-container">Create a New Blog Post</div>
         <div class="blog-form">
@@ -208,7 +234,6 @@
         </div>
     </div>
 
-    <!-- Blog Posts -->
     <div class="blog-container">
         <h1>Saved Blog Posts</h1>
         <div id="blog-list"></div>
@@ -217,37 +242,151 @@
     <footer class="social-footer">
         <p>All Rights Reserved © 2025</p>
     </footer>
-
+    
     <script>
         const isAdmin = localStorage.getItem("isAdmin") === "true";
-
+    
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBlogs(); // Load stored blogs first for instant display
+            fetchBlogs(); // Fetch fresh blogs from API
+        });
+    
+        function loadBlogs() {
+            const cachedBlogs = localStorage.getItem("savedBlogs");
+            if (cachedBlogs) {
+                displayBlogs(JSON.parse(cachedBlogs));
+            }
+        }
+    
+        function displayBlogs(blogs) {
+            const blogList = document.getElementById("blog-list");
+            blogList.innerHTML = ""; // Clear previous entries
+    
+            blogs.forEach(blog => {
+                const blogId = blog.id || blog._id;
+                if (blog.site !== "second-site") return;
+    
+                const formattedDate = blog.createdAt
+                    ? new Date(blog.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric"
+                      })
+                    : "Unknown Date";
+    
+                let adminControls = "";
+                if (isAdmin) {
+                    adminControls = `
+                        <button onclick="editBlog('${blogId}')" class="edit-btn">✏️ Edit</button>
+                        <button onclick="deleteBlog('${blogId}')" class="delete-btn">🗑️ Delete</button>
+                    `;
+                }
+    
+                blogList.innerHTML += `
+                    <div class="blog-item" id="blog-${blogId}">
+                        <h2>${blog.title}</h2>
+                        ${blog.coverImage ? `<img src="${blog.coverImage}" class="cover-image">` : ""}
+                        <p>${blog.content}</p>
+                        <p class="meta-info">Published on: ${formattedDate}</p>
+                        ${adminControls}
+                    </div>
+                `;
+            });
+        }
+    
         async function fetchBlogs() {
             try {
                 const response = await fetch("http://localhost:5001/api/blogs?site=second-site");
-                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+    
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+    
                 const blogs = await response.json();
-                document.getElementById("blog-list").innerHTML = blogs.map(blog => `
-                    <div class="blog-item">
-                        <h2>${blog.title}</h2>
-                        <p>${blog.content}</p>
-                        ${isAdmin ? `<button onclick="deleteBlog('${blog.id}')" class="delete-btn">🗑️ Delete</button>` : ""}
-                    </div>
-                `).join("");
+                localStorage.setItem("savedBlogs", JSON.stringify(blogs)); // Store in localStorage
+                displayBlogs(blogs);
             } catch (error) {
                 console.error("❌ Error fetching blogs:", error);
+                loadBlogs(); // Load cached blogs if API call fails
             }
         }
-
+    
         async function saveBlogPost() {
             const title = document.getElementById("blogTitle").value;
             const content = document.getElementById("blogContent").value;
-            if (!title || !content) return alert("Title and Content are required!");
-            await fetch("http://localhost:5000/api/blogs", { method: "POST", body: JSON.stringify({ title, content }) });
-            fetchBlogs();
+            const coverImageInput = document.getElementById("coverImage");
+    
+            if (!title || !content) {
+                alert("Title and Content are required!");
+                return;
+            }
+    
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("content", content);
+    
+            if (coverImageInput.files.length > 0) {
+                formData.append("coverImage", coverImageInput.files[0]);
+            }
+    
+            try {
+                const response = await fetch("http://localhost:5000/api/blogs", {
+                    method: "POST",
+                    body: formData
+                });
+    
+                if (response.ok) {
+                    alert("Blog post saved successfully!");
+                    fetchBlogs();
+                } else {
+                    alert("Error saving blog post!");
+                }
+            } catch (error) {
+                console.error("❌ Error saving blog post:", error);
+                alert("An error occurred while saving the blog post.");
+            }
         }
-
-        window.onload = fetchBlogs;
+    
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("imagePreview").src = e.target.result;
+                    document.getElementById("imagePreview").style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    
+        function editBlog(blogId) {
+            alert(`Editing blog with ID: ${blogId}`);
+            // Add logic for editing a blog post
+        }
+    
+        async function deleteBlog(blogId) {
+            if (!confirm("Are you sure you want to delete this blog post?")) return;
+    
+            try {
+                const response = await fetch(`http://localhost:5001/api/blogs/${blogId}`, {
+                    method: "DELETE",
+                });
+    
+                if (response.ok) {
+                    alert("Blog post deleted successfully!");
+                    fetchBlogs();
+                } else {
+                    alert("Error deleting blog post!");
+                }
+            } catch (error) {
+                console.error("❌ Error deleting blog post:", error);
+                alert("An error occurred while deleting the blog post.");
+            }
+        }
     </script>
+    
+    
 
 </body>
 </html>
+
