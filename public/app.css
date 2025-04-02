@@ -463,6 +463,13 @@ body {
   background: #0056b3;
 }
 
+.blog-content {
+  white-space: pre-line; /* Keeps new lines while ignoring excess spaces */
+  line-height: 1.6; /* Increases readability */
+  margin-bottom: 1em; /* Adds spacing */
+}
+
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .blog-container {
